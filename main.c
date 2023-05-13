@@ -3,6 +3,9 @@
 #include <math.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
+
+#define MAX_LINE_LENGTH 80
 
 FILE *fptr;
 
@@ -15,7 +18,7 @@ typedef struct Circle{
    bool umova;
 } circle;
 
-float input_formula();
+float input_formula(char* alpha);
 float calculate_length(float radius);
 float calculate_square(float radius);
 void output_characteristics_of_circle(circle *ss, int i);
@@ -49,65 +52,50 @@ float calculate_square(float radius){
 float execute(){
     int n,i;
     float x;
+    char* n_ins_s;
+    char* line_with_formula;
+    char checker=0,line[MAX_LINE_LENGTH] = {0};
+    unsigned int line_count = 0;
 
-
-    printf("input number of circles ");
-    scanf("%d",&n);
-
+    FILE *file = fopen("info.txt", "r");
+    
+    fgets(line, MAX_LINE_LENGTH, file);
+    n_ins_s=line;
+    if(!isdigit(atoi(n_ins_s))){n=atoi(n_ins_s);}
+    
     circle* qq = (circle*)malloc(n*sizeof(circle));
+    
+    while (fgets(line, MAX_LINE_LENGTH, file))
+    {
+        
+        line_with_formula=line;
+        line_with_formula[strcspn(line_with_formula, "\n")] = 0;
 
-    for(i = 0;i < n;i++){
+            qq[i].rad = input_formula(line_with_formula);
+            x = qq[i].rad;
+            
+            qq[i].square = calculate_square(x);
+            qq[i].length = calculate_length(x);
 
-        printf("\n\n%d)",i);
-        qq[i].rad = input_formula();
-        x = qq[i].rad;
-        qq[i].square = calculate_square(x);
-        qq[i].length = calculate_length(x);
 
-        output_characteristics_of_circle(qq,i);
-
-        if(qq[i].square  < qq[i].length){
-            qq[i].umova = true;
-        }
-        else{qq[i].umova = false;}
+            if(qq[i].square  < qq[i].length){
+                qq[i].umova = true;
+            }
+            else{qq[i].umova = false;}
+            i++;
+        
+        
     }
-
-    check_umovu(qq,n);
     save_in_txt(qq,n);
     free(qq);
 }
 
-void output_characteristics_of_circle(circle *ss, int i){
 
-    printf("\n%f",ss[i].rad);
-    printf("\n%f",ss[i].square);
-    printf("\n%f",ss[i].length);
 
-}
-
-void check_umovu(circle *ss, int n){
-
-    int i;
-
-    printf("\nUmovu zadovilnaut kola №:   ");
-
-    for(i=0;i<n;i++){
-        if(ss[i].umova==true){
-            printf(" %d ",i);
-        }
-    }
-}
-
-float input_formula(){
+float input_formula(char* alpha){
     char* radius;
     int i;
     float x=0;
-	char alpha[50];
-
-	if(problem_with_clear==true){gets(alpha); problem_with_clear=false;}
-
-	fgets(alpha, 50, stdin);
-
     radius=strchr(alpha,'=');
 	for(i=1;i<strlen(radius);i++){
 	    if((radius[i]=='\n')&&(i!=1)){break;}
